@@ -1,0 +1,6 @@
+{
+    "board": "MightyCore:avr:1284",
+    "configuration": "bootloader=uart0,pinout=standard,variant=modelP,BOD=2v7,LTO=Os,clock=16MHz_external",
+    "port": "/dev/cu.usbserial-A906H8C6",
+    "programmer": "AVR ISP"
+}

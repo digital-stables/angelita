@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "*.sperm": "json",
+        "*.hsd": "json",
+        "*.hud": "json",
+        "*.had": "json",
+        "*.mcu": "json",
+        "*.sertoli": "json",
+        "*.tph": "json",
+        "*.denome": "json",
+        "cstddef": "cpp"
+    }
+}
