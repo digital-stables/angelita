@@ -1,4 +1,4 @@
-// String manager
+// Static String
 // John Curtis
 #ifndef _STATIC_STR_H
 #define _STATIC_STR_H
@@ -9,15 +9,14 @@
 #endif
 #include <assert.h>
 #include <stdlib.h>
-//#include <type_traits>
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-//*** Flash memory ***************
+// Flash memory Helpers
 //NB. variables must be globally defined, OR defined with the static keyword, to work with PROGMEM.
 //  The following code will NOT work when inside a function:
-//const char long_str[] PROGMEM = "Hi, I would like to tell you a bit about myself.\n";
+//  const char long_str[] PROGMEM = "Hi, I would like to tell you a bit about myself.\n";
 //  The following code WILL work, even if locally defined within a function:
-//const static char long_str[] PROGMEM = "Hi, I would like to tell you a bit about myself.\n"
+//  const static char long_str[] PROGMEM = "Hi, I would like to tell you a bit about myself.\n"
 //
 //Define flash ie Program string const
 //ie.
@@ -34,13 +33,32 @@
 //#define GET_RSTR(lbl) GET_RSTR(lbl)
 ///////////////////////////////////////////////////////////////////////////////////////////
 //  Radix
+//  used for u_int display: see static_str constructors
 ///////////////////////////////////////////////////////////////////////////////////////////
-enum Radix{base8,base10,base16};//used for u int display
+enum Radix{base8,base10,base16};
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // static_str
-//	c_storage_size is the total bytes used for this class
-//	the size must be <=256 and divisible by 4
+// A wrapper class around a stack based fixed string char my_str[c_storage_size];
+// We also store the length in a byte (Thus the 256 byte limit!) to speed up operations.
+// the size must be <=256 and divisible by 4
+// Also added is support for a flash string printf style format() call.
+//
+// It is best used on the stack as a drop-in replacement for String to avoid dynamic memory allocation
+// NB.
+// * No memory is allocated so the string will overflow if the fixed size is too small!
+// * If a concat call overflows the return will be false
+// eg.
+// void to_serial(int widget_no,double d_val)
+//  {
+//  static_str<48> s;
+//	s.format(F("widget no: %i - val = %6.2f"),widget_no,d_val);
+//  Serial.print(s);
+//  s="45.3456";
+//	double d=s.toDouble();
+//  
+//  }
+// c_storage_size:  is the total bytes used for this class
 ///////////////////////////////////////////////////////////////////////////////////////////
 template<int c_storage_size>
 class static_str final
@@ -67,7 +85,7 @@ public:
 		{
 		switch(r)
 			{
-			case base8:	return 'o';
+			case base8: return 'o';
 			case base10:return 'u';
 			case base16:return 'x';
 			default: assert(false); return 'u';
@@ -355,8 +373,11 @@ public:
 		}
 #endif
 public:
+	long	toInt()const{return to_int<long>();}
+	float	toFloat()const{return to_float<float>();}
+	double	toDouble()const{return to_float<double>();}
 	template<typename T=double>
-	auto toFloat()const -> T
+	auto to_float()const -> T
 		{
 		T d=0.0f;
 		get_float(d);
@@ -372,19 +393,19 @@ public:
 		return !isnan(d);
 		}
 	template<typename T=int>
-	auto toInt()const -> T
+	auto to_int()const -> T
 		{
-		T d=0.0f;
-		get_int(d);
-		return d;
+		T i=0;
+		get_int(i);
+		return i;
 		}
 	template<typename T=int>
-	bool get_num(T& i)const
+	bool get_int(T& i)const
 		{
 		i=0;
 		if(empty())
 			return false;
-		i=::atoi(data());
+		i=static_cast<T>(::atol(data()));
 		return true;
 		}
 public:
