@@ -10,50 +10,39 @@
 #include <RTCInfoRecord.h>
 
 #include <GravityRtc.h>
-
 #include <GeneralFunctions.h>
 
 
 #define LEAP_YEAR(_year) ((_year%4)==0)
 
-int timeZoneHours=11;
-int SECONDOFFSET=10;
-static  byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
-GravityRtc rtc;
-
-TimeManager::TimeManager(GeneralFunctions& g, HardwareSerial& serial):generalFunctions(g),  _HardSerial(serial){
-
-}
-
+TimeManager::TimeManager(HardwareSerial& serial): _HardSerial(serial){}
 //
 // Functions that represents commands received via the serial port
 //
 
-
-
 //SetTime#23#05#2019#4#05#48#20
 
-
-boolean TimeManager::setTime(String command){
-	int date = generalFunctions.getValue(command, '#', 1).toInt();
-	int month = generalFunctions.getValue(command, '#', 2).toInt();
-	int year = generalFunctions.getValue(command, '#', 3).toInt();
-	int dw = generalFunctions.getValue(command, '#', 4).toInt();
-	int hour = generalFunctions.getValue(command, '#', 5).toInt();
-	int min = generalFunctions.getValue(command, '#', 6).toInt();
-	int sec = generalFunctions.getValue(command, '#', 7).toInt();
+boolean TimeManager::setTime(String command)
+{
+	int date = GeneralFunctions::getValue(command, '#', 1).toInt();
+	int month = GeneralFunctions::getValue(command, '#', 2).toInt();
+	int year = GeneralFunctions::getValue(command, '#', 3).toInt();
+	int dw = GeneralFunctions::getValue(command, '#', 4).toInt();
+	int hour = GeneralFunctions::getValue(command, '#', 5).toInt();
+	int min = GeneralFunctions::getValue(command, '#', 6).toInt();
+	int sec = GeneralFunctions::getValue(command, '#', 7).toInt();
 
 	_HardSerial.print(rtc.day);
-		_HardSerial.print("/");
-		_HardSerial.print(rtc.month);
-		_HardSerial.print("/");
-		_HardSerial.print(rtc.year);
-		_HardSerial.print(" ");
-		_HardSerial.print(rtc.hour);
-		_HardSerial.print(":");
-		_HardSerial.print(rtc.minute);
-		_HardSerial.print(":");
-		_HardSerial.print(rtc.second);
+	_HardSerial.print("/");
+	_HardSerial.print(rtc.month);
+	_HardSerial.print("/");
+	_HardSerial.print(rtc.year);
+	_HardSerial.print(" ");
+	_HardSerial.print(rtc.hour);
+	_HardSerial.print(":");
+	_HardSerial.print(rtc.minute);
+	_HardSerial.print(":");
+	_HardSerial.print(rtc.second);
 
 
 	rtc.adjustRtc(year,month,date,dw,hour,min,sec);
@@ -120,6 +109,7 @@ long TimeManager::dateAsSeconds(uint16_t year, uint8_t month, uint8_t date, uint
 		}
 	}
 	// add days for this year
+	static  const byte monthDays[]={31,28,31,30,31,30,31,31,30,31,30,31};
 	for (i=0; i<month; i++) {
 		if (i==1 && LEAP_YEAR(year)) {
 			seconds+= 60*60*24L*29;

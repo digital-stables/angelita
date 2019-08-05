@@ -14,13 +14,16 @@
 class OLED: public LCDDisplay {
 public:
 	OLED();
+	virtual ~OLED();
 	void begin();
 	void display();
 	void clear();
 	void setRGB(int, int, int);
-	void print( String);
+	void print(const char*);
+	void println(const char*);
+	void print(const String&);
+	void println(const String&);
 	void print(float);
-	void println( String);
 	void println(float);
 	void noDisplay();
 	void setCursor(uint8_t, uint8_t);
@@ -32,7 +35,6 @@ public:
 	void println(int);
 	void print(byte);
 	void println(byte);
-	virtual ~OLED();
 
 };
 

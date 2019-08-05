@@ -10,38 +10,21 @@
 
 #define PASSLENGTH 8
 
-
-
-GeneralFunctions::GeneralFunctions(){
-
-}
-
-
-
 int GeneralFunctions::freeRam () {
   extern int __heap_start, *__brkval; 
   int v; 
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval); 
 }
 
-char* GeneralFunctions::generatePassword(){
+const char* GeneralFunctions::generatePassword()
+{
 	static char pass[PASSLENGTH+1];
-	const char*  alphabeth = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'?^&/%$£-+";
-	const long alphabethLength = sizeof(alphabeth);
-
+	static_str<80>  alphabeth(F("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'?^&/%$£-+"));
 	for (int n = 0; n < PASSLENGTH; n++){
-		pass[n] = alphabeth[random(0, alphabethLength)];
+		pass[n] = alphabeth[random(0,alphabeth.length())];
 	}
 	pass[PASSLENGTH] = '\0';
 	return pass;
-}
-
-
-float GeneralFunctions::stringToFloat(String s){
-	char buffer3[10];
-	s.toCharArray(buffer3, 10);
-	float result = atof(buffer3);
-	return result;
 }
 
 String GeneralFunctions::getValue(String data, char separator, int index)

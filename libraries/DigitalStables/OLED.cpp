@@ -49,7 +49,7 @@ void OLED::setRGB(int r, int g, int b){
 void OLED::setCursor(uint8_t c, uint8_t r){
 
 }
-void OLED::print(const String s){
+void OLED::print(const char* s){
 	anSSD1306AsciiAvrI2c.print(s);
 }
 
@@ -57,9 +57,11 @@ void OLED::print(float s){
 	anSSD1306AsciiAvrI2c.print(s);
 }
 
-void OLED::println(const String s){
+void OLED::println(const char* s){
 	anSSD1306AsciiAvrI2c.println(s);
 }
+void OLED::print(const String& s){anSSD1306AsciiAvrI2c.print(s);}
+void OLED::println(const String& s){anSSD1306AsciiAvrI2c.println(s);}
 
 void OLED::println(float s){
 	anSSD1306AsciiAvrI2c.println(s);

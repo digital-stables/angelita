@@ -11,14 +11,16 @@
 
 class LCDDisplay {
 public:
-	LCDDisplay();
-	virtual ~LCDDisplay();
+	LCDDisplay(){}
+	virtual ~LCDDisplay(){}
 	virtual void begin()=0;
 	virtual void clear()=0;
 	virtual void setRGB(int, int, int)=0;
 	virtual void setCursor(uint8_t, uint8_t)=0;
-	virtual void print( String)=0;
-	virtual void println( String)=0;
+	virtual void print(const char*)=0;
+	virtual void println(const char*)=0;
+	virtual void print(const String&)=0;
+	virtual void println(const String&)=0;
 	virtual void print(float)=0;
 	virtual void println(float)=0;
 	virtual void print(long)=0;

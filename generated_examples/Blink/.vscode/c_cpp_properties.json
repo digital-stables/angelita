@@ -1,0 +1,27 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "defines": [
+                "ARDUINO=10800"
+            ],
+            "includePath": [
+                "${workspaceRoot}",
+                "c:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\**",
+                "c:\\Program Files (x86)\\Arduino\\tools\\**",
+                "c:\\Program Files (x86)\\Arduino\\hardware\\tools\\**",
+                "c:\\Program Files (x86)\\Arduino\\libraries\\**",
+                "C:\\Users\\Developer\\Documents\\Arduino\\hardware\\tools\\**",
+                "C:\\Users\\Developer\\Documents\\Arduino\\libraries\\**"
+            ],
+            "forcedInclude": [
+                "c:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
+            ],
+            "intelliSenseMode": "clang-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.21.27702/bin/Hostx64/x64/cl.exe"
+        }
+    ],
+    "version": 4
+}

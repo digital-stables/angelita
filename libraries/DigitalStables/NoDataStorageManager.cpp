@@ -19,16 +19,10 @@
 #include <Wire.h>
 
 
-
-
-
-NoDataStorageManager::NoDataStorageManager(DataStorageManagerInitParams& d, TimeManager& t, GeneralFunctions& f,HardwareSerial& serial, LCDDisplay& l ): dataStorageManagerInitParams(d), timeManager(t), generalFunctions(f), _HardSerial(serial), lcdDisplay(l)
+NoDataStorageManager::NoDataStorageManager(DataStorageManagerInitParams& d, TimeManager& t,HardwareSerial& serial, LCDDisplay& l ): dataStorageManagerInitParams(d), timeManager(t), _HardSerial(serial), lcdDisplay(l)
 {}
 
 boolean NoDataStorageManager::start(){
-
-	
-
 }
 
 boolean NoDataStorageManager::readUntransferredFileFromSDCardByDate(int moveData, boolean sendToSerial,const char *dirName, int date, int month, int year){
@@ -37,7 +31,7 @@ boolean NoDataStorageManager::readUntransferredFileFromSDCardByDate(int moveData
 boolean NoDataStorageManager::readUntransferredFileFromSDCard(int moveData, boolean sendToSerial, const char *dirName){
 
 }
-void NoDataStorageManager::storeRememberedValue(long time, const char *name, float value, String unit){
+void NoDataStorageManager::storeRememberedValue(long time,const static_str<16>&, float value, String unit){
 
 }
 void NoDataStorageManager::storeDiscreteRecord( DiscreteRecord &discreteRec){

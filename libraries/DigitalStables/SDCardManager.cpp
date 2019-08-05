@@ -22,15 +22,9 @@
 
 #define SD_PIN 4
 
-extern char sensorDirName[10];
-extern char lifeCycleFileName[10];
-extern char remFileName[10];
-
 const char *MAXIMUM_VALUE="Max";
 const char *MINIMUM_VALUE="Min";
 const char *AVERAGE_VALUE="Avg";
-
-
 
 extern char sensorDirName[10];
 extern char lifeCycleFileName[10];
@@ -39,7 +33,7 @@ extern char remFileName[10];
 File currentlyOpenFile;
 const char *currentlyOpenFileName;
 boolean cardOk=false;
-SDCardManager::SDCardManager(DataStorageManagerInitParams& d,TimeManager& t, GeneralFunctions& f,HardwareSerial& serial, LCDDisplay& l ):dataStorageManagerInitParams(d), timeManager(t), generalFunctions(f), _HardSerial(serial), lcdDisplay(l)
+SDCardManager::SDCardManager(DataStorageManagerInitParams& d,TimeManager& t,HardwareSerial& serial, LCDDisplay& l ):dataStorageManagerInitParams(d), timeManager(t),_HardSerial(serial), lcdDisplay(l)
 {}
 
 boolean SDCardManager::start(){
@@ -198,11 +192,11 @@ boolean SDCardManager::readUntransferredFileFromSDCard(int moveData, boolean sen
 
 
 
-void SDCardManager::storeRememberedValue(long time, const char *name, float value, String unit){
+void SDCardManager::storeRememberedValue(long time,const static_str<16>& name, float value, String unit){
 	//File untransferredFile = SD.open("/" + RememberedValueDataDirName + "/" + unstraferedFileName, FILE_WRITE);
 if(!cardOk)return ;
-	char untransferredFileName[25];
-	sprintf(untransferredFileName,"/%s/%s",RememberedValueDataDirName,unstraferedFileName);
+	static_str<28> untransferredFileName;
+	untransferredFileName.format("/%s/%s",RememberedValueDataDirName,unstraferedFileName);
 	File untransferredFile = SD.open(untransferredFileName, FILE_WRITE);
 
 	if (untransferredFile) {
@@ -222,8 +216,8 @@ if(!cardOk)return ;
 
 void SDCardManager::storeDiscreteRecord(DiscreteRecord &discreteRec){
 	if(!cardOk)return;
-	char untransferredFileName[25];
-	sprintf(untransferredFileName,"/%s/%s",DiscreteRecordDirName,unstraferedFileName);
+	static_str<32> untransferredFileName;
+	untransferredFileName.format("/%s/%s",DiscreteRecordDirName,unstraferedFileName);
 	File untransferredFile = SD.open(untransferredFileName, FILE_WRITE);
 	if (untransferredFile) {
 		// Write to file
@@ -236,7 +230,7 @@ void SDCardManager::storeDiscreteRecord(DiscreteRecord &discreteRec){
 boolean SDCardManager::openDiscreteRecordFile()
 {
 	if(!cardOk)return false;
-	char untransferredFileName[25];
+	static_str<32> untransferredFileName;
 
 	sprintf(untransferredFileName,"/%s/%s",DiscreteRecordDirName,unstraferedFileName);
 	currentlyOpenFile = SD.open(untransferredFileName, FILE_WRITE);
@@ -358,9 +352,9 @@ if(!cardOk)return -9999.0;
 			// and copy it into today's file
 			line = todayFile.readStringUntil('\n');
 
-			generalFunctions.getValue(line, '#', 1).toCharArray(anyLabel, sizeof anyLabel);
+			GeneralFunctions::getValue(line, '#', 1).toCharArray(anyLabel, sizeof anyLabel);
 			if(strcmp(label, anyLabel) == 0){
-				value = generalFunctions.stringToFloat(generalFunctions.getValue(line, '#', 2));
+				value =GeneralFunctions::getValue(line, '#', 2).toFloat();
 				if(whatToSearchFor == MAXIMUM_VALUE){
 					if(value>result)result=value;
 				}else if(whatToSearchFor == MINIMUM_VALUE){

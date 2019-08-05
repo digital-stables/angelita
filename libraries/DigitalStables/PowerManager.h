@@ -16,8 +16,47 @@
 #include <SecretManager.h>
 
 
+	DEFINE_RSTR(UNIT_VOLT ,"Volt");
+	DEFINE_PSTR(UNIT_SECONDS,"sec");
+	DEFINE_PSTR(UNIT_MILLI_AMPERES ,"mA");
+	DEFINE_PSTR(UNIT_MILLI_AMPERES_HOURS ,"mAh");
+	DEFINE_PSTR(FORCED_PI_TURN_OFF ,"FPTO");
+	DEFINE_PSTR(BATTERY_VOLTAGE_BEFORE_PI_ON ,"BVBTPO");
+	DEFINE_PSTR(BATTERY_VOLTAGE_ATER_PI_ON,"BVATPO");
+	DEFINE_PSTR(BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON ,"BVDATPO");
+	DEFINE_PSTR(PI_TURN_OFF ,"Pi Turn Off");
+
+	DEFINE_RSTR(UNIT_NO_UNIT ," ");
+	DEFINE_RSTR(UNIT_PERCENTAGE,"%");
 
 
+	DEFINE_PSTR(LIFE_CYCLE_EVENT_FORCED_START_WPS ,"FSWPS");
+	DEFINE_PSTR(LIFE_CYCLE_MANUAL_SHUTDOWN    ,"MS");
+	DEFINE_PSTR(LIFE_CYCLE_EVENT_START_WPS    ,"SW");
+	DEFINE_PSTR(LIFE_CYCLE_EVENT_END_WPS     ,"EWS");
+	DEFINE_PSTR(LIFE_CYCLE_EVENT_START_COMMA ,"SC");
+	DEFINE_RSTR(LIFE_CYCLE_EVENT_END_COMMA ,"EC");
+
+	DEFINE_PSTR( LIFE_CYCLE_EVENT_START_EXTENDED_OPERON_EXECUTION,"SEOE");
+	DEFINE_PSTR( LIFE_CYCLE_EVENT_END_EXTENDED_OPERON_EXECUTION,"EEOE");
+	DEFINE_PSTR( LIFE_CYCLE_EVENT_UPDATE_EXTENDED_OPERON_EXECUTION,"UEOE");
+
+	DEFINE_PSTR(DAILY_STATS_TIMESTAMP,"DST");
+	DEFINE_PSTR(DAILY_MINIMUM_BATTERY_VOLTAGE,"DMiBV");
+	DEFINE_PSTR(DAILY_MAXIMUM_BATTERY_VOLTAGE,"DMaBV");
+	DEFINE_PSTR(DAILY_MINIMUM_BATTERY_CURRENT,"DMiBC");
+	DEFINE_PSTR(DAILY_MAXIMUM_BATTERY_CURRENT,"DMaBC");
+	DEFINE_PSTR(DAILY_ENERGY,"DE");
+	DEFINE_PSTR(DAILY_POWERED_DOWN_IN_LOOP_SECONDS,"DPDInLS");
+	DEFINE_PSTR(HOURLY_ENERGY,"HE");
+	DEFINE_PSTR(HOURLY_POWERED_DOWN_IN_LOOP_SECONDS,"HPDILS");
+	DEFINE_PSTR(HOURLY_OPERATING_IN_LOOP_SECONDS,"HOILS");
+	DEFINE_PSTR(DiscreteDirName,"Discrete");
+	
+	DEFINE_RSTR(WPSSensorDataDirName,"WPSSensr");
+	DEFINE_RSTR(LifeCycleDataDirName,"LifeCycl");
+	DEFINE_RSTR(RememberedValueDataDirName,"RememVal");
+	DEFINE_RSTR(unstraferedFileName ,"Untransf.txt");
 
 class PowerManager{
 
@@ -67,56 +106,16 @@ public:
 
 	TimeManager  timeManager;
 	SecretManager  secretManager;
-	GeneralFunctions  generalFunctions;
 	DataStorageManager  &dataStorageManager;
 	HardwareSerial _HardSerial;
 	LCDDisplay&  lcd;
 
-	constexpr static const char *UNIT_VOLT ="Volt";
-	constexpr static const char *UNIT_SECONDS="sec";
-	constexpr static const char *UNIT_MILLI_AMPERES ="mA";
-	constexpr static const char *UNIT_MILLI_AMPERES_HOURS ="mAh";
-	constexpr static const char *UNIT_PERCENTAGE ="%";
-	constexpr static const char *FORCED_PI_TURN_OFF ="FPTO";
-	constexpr static const char *BATTERY_VOLTAGE_BEFORE_PI_ON ="BVBTPO";
-	constexpr static const char *BATTERY_VOLTAGE_ATER_PI_ON="BVATPO";
-	constexpr static const char *BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON ="BVDATPO";
-	constexpr static const char *PI_TURN_OFF ="Pi Turn Off";
-	constexpr static const char *UNIT_NO_UNIT =" ";
-
-
-	constexpr static const char *LIFE_CYCLE_EVENT_FORCED_START_WPS ="FSWPS";
-	constexpr static const char *LIFE_CYCLE_MANUAL_SHUTDOWN    ="MS";
-	constexpr static const char *LIFE_CYCLE_EVENT_START_WPS    ="SW";
-	constexpr static const char *LIFE_CYCLE_EVENT_END_WPS     ="EWS";
-	constexpr static const char *LIFE_CYCLE_EVENT_START_COMMA ="SC";
-	constexpr static const char *LIFE_CYCLE_EVENT_END_COMMA ="EC";
 	constexpr static const int LIFE_CYCLE_EVENT_AWAKE_VALUE=3;
 	constexpr static const int LIFE_CYCLE_EVENT_WPS_VALUE=2;
 	constexpr static const int LIFE_CYCLE_EVENT_COMMA_VALUE=1;
 
-	constexpr static const char * LIFE_CYCLE_EVENT_START_EXTENDED_OPERON_EXECUTION="SEOE";
-	constexpr static const char * LIFE_CYCLE_EVENT_END_EXTENDED_OPERON_EXECUTION="EEOE";
-	constexpr static const char * LIFE_CYCLE_EVENT_UPDATE_EXTENDED_OPERON_EXECUTION="UEOE";
-
-	constexpr static const char *DAILY_STATS_TIMESTAMP="DST";
-	constexpr static const char *DAILY_MINIMUM_BATTERY_VOLTAGE="DMiBV";
-	constexpr static const char *DAILY_MAXIMUM_BATTERY_VOLTAGE="DMaBV";
-	constexpr static const char *DAILY_MINIMUM_BATTERY_CURRENT="DMiBC";
-	constexpr static const char *DAILY_MAXIMUM_BATTERY_CURRENT="DMaBC";
-	constexpr static const char *DAILY_ENERGY="DE";
-	constexpr static const char *DAILY_POWERED_DOWN_IN_LOOP_SECONDS="DPDInLS";
-	constexpr static const char *HOURLY_ENERGY="HE";
-	constexpr static const char *HOURLY_POWERED_DOWN_IN_LOOP_SECONDS="HPDILS";
-	constexpr static const char *HOURLY_OPERATING_IN_LOOP_SECONDS="HOILS";
-	const char  *WPSSensorDataDirName="WPSSensr";
-
-	const char  *DiscreteDirName="Discrete";
-	const char  *LifeCycleDataDirName="LifeCycl";
-	const char  *RememberedValueDataDirName  = "RememVal";
-	const char  *unstraferedFileName ="Untransf.txt";
 	PowerManager();
-	PowerManager(LCDDisplay & l , SecretManager & s, DataStorageManager & sd, TimeManager & t, GeneralFunctions  & f, HardwareSerial& serial);
+	PowerManager(LCDDisplay & l , SecretManager & s, DataStorageManager & sd, TimeManager & t, HardwareSerial& serial);
 	void start();
 	void hourlyTasks(long time, int previousHour );
 	void dailyTasks(long time, int yesterdayDate, int yesterdayMonth, uint16_t yesterdayYear );
@@ -139,13 +138,6 @@ public:
 	float getLockCapacitorVoltage();
 	void toggleWDT();
 	void printBaseSensorStringToSerialPort();
-
-protected:
-
-
-private:
-
-
 };
 
 #endif

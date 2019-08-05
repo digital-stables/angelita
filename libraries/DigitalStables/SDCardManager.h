@@ -19,7 +19,6 @@
 class SDCardManager: public DataStorageManager{
 
 	TimeManager & timeManager;
-	GeneralFunctions & generalFunctions;
 	HardwareSerial& _HardSerial;
 	LCDDisplay&  lcdDisplay;
 	DataStorageManagerInitParams& dataStorageManagerInitParams;
@@ -29,13 +28,12 @@ class SDCardManager: public DataStorageManager{
 	const char  *DiscreteRecordDirName  = "Discrete";
 	const char  *EventRecordDirName  = "Events";
 	const char  *unstraferedFileName ="Untransf.txt";
-
 public:
-	SDCardManager(DataStorageManagerInitParams& d, TimeManager & t, GeneralFunctions  & f, HardwareSerial& serial, LCDDisplay& l);
+	SDCardManager(DataStorageManagerInitParams& d, TimeManager & t, HardwareSerial& serial, LCDDisplay& l);
 	boolean start();
 	boolean readUntransferredFileFromSDCardByDate(int moveData, boolean sendToSerial,const char *dirName, int date, int month, int year);
 	boolean readUntransferredFileFromSDCard(int moveData, boolean sendToSerial, const char *dirName);
-	void storeRememberedValue(long time, const char *name, float value, String unit);
+	void storeRememberedValue(long time,const static_str<16>& name, float value, String unit);
 
 	void storeDiscreteRecord( DiscreteRecord &discreteRec);
 	boolean readDiscreteRecord(uint16_t index,DiscreteRecord& rec);

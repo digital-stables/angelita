@@ -16,16 +16,17 @@
 #include <DataStorageManagerInitParams.h>
 #include <WPSSensorRecord.h>
 #include <LCDDisplay.h>
+#include <static_str.h>
 
 class DataStorageManager {
 public:
 	DataStorageManager();
 
-	DataStorageManager(DataStorageManagerInitParams&  d, TimeManager & t, GeneralFunctions  & f, HardwareSerial& serial, LCDDisplay& l);
+	DataStorageManager(DataStorageManagerInitParams&  d, TimeManager & t, HardwareSerial& serial, LCDDisplay& l);
 	virtual boolean start()=0;
 	virtual boolean readUntransferredFileFromSDCardByDate(int moveData, boolean sendToSerial,const char *dirName, int date, int month, int year)=0;
 	virtual boolean readUntransferredFileFromSDCard(int moveData, boolean sendToSerial, const char *dirName)=0;
-	virtual void storeRememberedValue(long time, const char *name, float value, String unit)=0;
+	virtual void storeRememberedValue(long time,const static_str<16>& name,float value, String unit)=0;
 	virtual void storeDiscreteRecord( DiscreteRecord& discreteRec)=0;
 	virtual boolean readDiscreteRecord(uint16_t index,DiscreteRecord& rec)=0;
 	virtual boolean openDiscreteRecordFile()=0;
@@ -36,7 +37,6 @@ public:
 	virtual boolean openEventRecordFile(const char *filename)=0;
 	virtual void closeEventRecordFile(boolean)=0;
 
-
 	virtual float searchRememberedValue(const char *label, int date, int month, int year, char *whatToSearchFor)=0;
 	virtual void storeLifeCycleEvent(long time, const char *eventType, int eventValue)=0;
 	virtual long printDirectory(File dir, int numTabs)=0;
@@ -44,7 +44,6 @@ public:
 	virtual long getSDCardDiskUse(File dir )=0;
 	virtual boolean getHistoricalData(const char *dirName, int date, int month, int year)=0;
 	virtual void saveWPSSensorRecord(WPSSensorRecord anWPSSensorRecord)=0;
-
 	//
 	// Functions that represent Serial commands
 	//

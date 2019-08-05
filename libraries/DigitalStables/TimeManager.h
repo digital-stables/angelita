@@ -14,12 +14,11 @@
 
 class TimeManager{
 	HardwareSerial& _HardSerial;
-	GeneralFunctions& generalFunctions;
 	GravityRtc rtc;
 
 	public:
-		TimeManager(GeneralFunctions& g, HardwareSerial& serial);
-                void start();
+		TimeManager(HardwareSerial& serial);
+    void start();
 		long dateAsSeconds(uint16_t year, uint8_t month, uint8_t date, uint8_t hour, uint8_t minute, uint8_t second);
 		void hourlyTasks(long time, int previousHour );
 		void dailyTasks(long time, int yesterdayDate, int yesterdayMonth, int yesterdayYear );

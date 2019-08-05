@@ -8,15 +8,14 @@
 #ifndef GENERALFUNCTIONS_H_
 #define GENERALFUNCTIONS_H_
 #include "Arduino.h"
+#include <static_str.h>
 
 class GeneralFunctions{
 public:
-	GeneralFunctions();
-	String getValue(String data, char separator, int index);
-	byte getStateOfCharge(double batteryVoltage);
-	float stringToFloat(String s);
-	char * generatePassword();
-	int freeRam () ;
+	static String getValue(String data, char separator, int index);
+	static byte getStateOfCharge(double batteryVoltage);
+	static const char * generatePassword();
+	static int freeRam ();
 };
 #endif /* GENERALFUNCTIONS_H_ */
 

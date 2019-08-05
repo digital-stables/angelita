@@ -14,25 +14,20 @@
 
 #include <SPI.h>
 #include <SD.h>
-
 //
 // the wps variables
 #define LOCK_CAPACITOR_PIN A5
 #define BATTERY_VOLTAGE_PIN A1
 
-
-
 char *faultData;
 long secondsToForcedWPS=60L;
 long wpsAlertTime=0L;
 
-
 float capacitorVoltage= 0;
 
-
-char remFileName[10];
-char sensorDirName[10];
-char lifeCycleFileName[10];
+//char remFileName[10]="";
+//char sensorDirName[10]="";
+//char lifeCycleFileName[10]="";
 
 long shutDownRequestedseconds= 0L;
 boolean shuttingDownPiCountdown=false;
@@ -42,8 +37,6 @@ boolean waitingManualPiStart=false;
 // the battery voltage always in A1
 // for compatibility with Gloria, Wally and Valentino
 //
-
-
     //effective current
 boolean powerSupplyOn=false;
 
@@ -52,36 +45,22 @@ boolean powerSupplyOn=false;
 // Controls what the user sees in the lcdnow
 // it starts with a value of 99 which means is locked
 
-
 boolean showingAct=false;
-
 byte currentHour=0;
 byte currentDay=0;
 byte currentMonth=0;
 byte currentYear=0;
-
-
-
-
-
 //
 // the virtual micrcntroller
-
 String currentIpAddress="No IP";
 String currentSSID="No SSID";
 byte delayTime=1;
 
-
-
 byte SHARED_SECRET_LENGTH;
-
-
-
 
 long previousUpdate;
 
-
-PowerManager::PowerManager(LCDDisplay& l, SecretManager& s, DataStorageManager& sd, TimeManager& t, GeneralFunctions& f,HardwareSerial& serial ): lcd(l),secretManager(s), dataStorageManager(sd),timeManager(t), generalFunctions(f), _HardSerial(serial)
+PowerManager::PowerManager(LCDDisplay& l, SecretManager& s, DataStorageManager& sd, TimeManager& t,HardwareSerial& serial): lcd(l),secretManager(s), dataStorageManager(sd),timeManager(t), _HardSerial(serial)
 {}
 
 void PowerManager::start(){
@@ -97,9 +76,9 @@ void PowerManager::start(){
 }
 void PowerManager::hourlyTasks(long time, int previousHour ){
 
-	dataStorageManager.storeRememberedValue(time,HOURLY_ENERGY, hourlyBatteryOutEnergy, UNIT_MILLI_AMPERES_HOURS);
-	dataStorageManager.storeRememberedValue(time,HOURLY_POWERED_DOWN_IN_LOOP_SECONDS, hourlyPoweredDownInLoopSeconds, UNIT_SECONDS);
-	dataStorageManager.storeRememberedValue(time,HOURLY_OPERATING_IN_LOOP_SECONDS, 3600-hourlyPoweredDownInLoopSeconds, UNIT_SECONDS);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(HOURLY_ENERGY), hourlyBatteryOutEnergy, GET_PSTR(UNIT_MILLI_AMPERES_HOURS));
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(HOURLY_POWERED_DOWN_IN_LOOP_SECONDS), hourlyPoweredDownInLoopSeconds, GET_PSTR(UNIT_SECONDS));
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(HOURLY_OPERATING_IN_LOOP_SECONDS), 3600-hourlyPoweredDownInLoopSeconds, GET_PSTR(UNIT_SECONDS));
 	hourlyBatteryOutEnergy=0;
 	hourlyPoweredDownInLoopSeconds=0;
 }
@@ -114,13 +93,13 @@ void PowerManager::dailyTasks(long time, int yesterdayDate, int yesterdayMonth, 
 	result = dataStorageManager.readUntransferredFileFromSDCardByDate( 1,false, WPSSensorDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear);
 	result = dataStorageManager.readUntransferredFileFromSDCardByDate( 1,false, LifeCycleDataDirName,yesterdayDate, yesterdayMonth, yesterdayYear);
 	long yesterdayDateSeconds = timeManager.dateAsSeconds(yesterdayYear,yesterdayMonth,yesterdayDate, 0, 0, 0);
-	dataStorageManager.storeRememberedValue(time,DAILY_STATS_TIMESTAMP, yesterdayDateSeconds, UNIT_NO_UNIT);
-	dataStorageManager.storeRememberedValue(time,DAILY_MINIMUM_BATTERY_VOLTAGE, dailyMinBatteryVoltage, UNIT_VOLT);
-	dataStorageManager.storeRememberedValue(time,DAILY_MAXIMUM_BATTERY_VOLTAGE, dailyMaxBatteryVoltage, UNIT_VOLT);
-	dataStorageManager.storeRememberedValue(time,DAILY_MINIMUM_BATTERY_CURRENT, dailyMinBatteryCurrent, UNIT_MILLI_AMPERES);
-	dataStorageManager.storeRememberedValue(time,DAILY_MAXIMUM_BATTERY_CURRENT, dailyMaxBatteryCurrent, UNIT_MILLI_AMPERES);
-	dataStorageManager.storeRememberedValue(time,DAILY_ENERGY, dailyBatteryOutEnergy, UNIT_MILLI_AMPERES_HOURS);
-	dataStorageManager.storeRememberedValue(time,DAILY_POWERED_DOWN_IN_LOOP_SECONDS, dailyPoweredDownInLoopSeconds, UNIT_SECONDS);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(DAILY_STATS_TIMESTAMP), yesterdayDateSeconds, GET_RSTR(UNIT_NO_UNIT));
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(DAILY_MINIMUM_BATTERY_VOLTAGE), dailyMinBatteryVoltage, GET_RSTR(UNIT_VOLT));
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(DAILY_MAXIMUM_BATTERY_VOLTAGE), dailyMaxBatteryVoltage, GET_RSTR(UNIT_VOLT));
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(DAILY_MINIMUM_BATTERY_CURRENT), dailyMinBatteryCurrent, GET_PSTR(UNIT_MILLI_AMPERES));
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(DAILY_MAXIMUM_BATTERY_CURRENT), dailyMaxBatteryCurrent, GET_PSTR(UNIT_MILLI_AMPERES));
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(DAILY_ENERGY), dailyBatteryOutEnergy, GET_PSTR(UNIT_MILLI_AMPERES_HOURS));
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(DAILY_POWERED_DOWN_IN_LOOP_SECONDS), dailyPoweredDownInLoopSeconds, GET_PSTR(UNIT_SECONDS));
 	dailyMinBatteryVoltage = 9999.0;
 	dailyMaxBatteryVoltage = -1.0;
 	dailyMinBatteryCurrent = 9999.0;
@@ -250,17 +229,17 @@ void PowerManager::enterArduinoSleep(void)
 	if(batteryVoltage>minWPSVoltage){
 		// STORE a lifecycle comma exit record
 		long now = timeManager.getCurrentTimeInSeconds();
-		dataStorageManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
+		dataStorageManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA,LIFE_CYCLE_EVENT_COMMA_VALUE);
 		lcd.display();
 		lcd.setRGB(255,255,0);
 		lcd.clear();
 		lcd.setCursor(0,0);
-		lcd.print("Out of Comma");
+		lcd.print(F("Out of Comma"));
 		lcd.setCursor(0,1);
 		lcd.print(batteryVoltage);
-		lcd.print("V ");
+		lcd.print(F("V "));
 		lcd.print(lastSleepSeconds);
-		lcd.print("V ");
+		lcd.print(F("V "));
 
 		operatingStatus="WPS";
 		currentSleepStartTime = now;
@@ -274,7 +253,7 @@ void PowerManager::enterArduinoSleep(void)
 		lcd.setRGB(255,0,0);
 		lcd.clear();
 		lcd.print(batteryVoltage);
-		lcd.print("V");
+		lcd.print(F("V"));
 		delay(500);
 		lcd.noDisplay();
 		lcd.setRGB(0,0,0);
@@ -324,16 +303,16 @@ void PowerManager::pauseWPS(void)
 	lcd.setRGB(255,255,0);
 	lcd.clear();
 	lcd.setCursor(0,0);
-	lcd.print("Out of Pause");
+	lcd.print(F("Out of Pause"));
 	lcd.setCursor(0,1);
 	float batteryVoltage = getBatteryVoltage();
 	lcd.print(batteryVoltage);
-	lcd.print("V ");
+	lcd.print(F("V "));
 	lcd.print(pauseDuringWPS);
 
 	operatingStatus="WPS";
 	//lcd.setCursor(0, 1);
-	//lcd.print("Awake") ;
+	//lcd.print(F("Awake"));
 	sleep_disable(); /* First thing to do is disable sleep. */
 	/* Re-enable the peripherals. */
 	power_all_enable();
@@ -354,10 +333,10 @@ void PowerManager::turnPiOffForced(long time){
 	delay(1000);
 	float batteryVoltageAfter = getBatteryVoltage();
 	float voltageDifferential = 1-(batteryVoltageBefore/batteryVoltageAfter);
-	dataStorageManager.storeRememberedValue(time,FORCED_PI_TURN_OFF,0 , operatingStatus);
-	dataStorageManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	dataStorageManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	dataStorageManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(FORCED_PI_TURN_OFF),0 , operatingStatus);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(BATTERY_VOLTAGE_BEFORE_PI_ON), batteryVoltageBefore, UNIT_VOLT);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(BATTERY_VOLTAGE_ATER_PI_ON), batteryVoltageBefore, UNIT_VOLT);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON), voltageDifferential, UNIT_PERCENTAGE);
 }
 
 void PowerManager::turnPiOff(long time){
@@ -366,10 +345,10 @@ void PowerManager::turnPiOff(long time){
 	delay(1000);
 	float batteryVoltageAfter = getBatteryVoltage();
 	float voltageDifferential = 1-(batteryVoltageBefore/batteryVoltageAfter);
-	dataStorageManager.storeRememberedValue(time,PI_TURN_OFF,0 , operatingStatus);
-	dataStorageManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	dataStorageManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	dataStorageManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(PI_TURN_OFF),0 , operatingStatus);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(BATTERY_VOLTAGE_BEFORE_PI_ON), batteryVoltageBefore, UNIT_VOLT);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(BATTERY_VOLTAGE_ATER_PI_ON), batteryVoltageBefore, UNIT_VOLT);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON), voltageDifferential, UNIT_PERCENTAGE);
 }
 
 
@@ -380,9 +359,9 @@ void PowerManager::turnPiOn(long time){
 	float batteryVoltageAfter = getBatteryVoltage();
 	float voltageDifferential = 1-(batteryVoltageAfter/batteryVoltageBefore);
 
-	dataStorageManager.storeRememberedValue(time,BATTERY_VOLTAGE_BEFORE_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	dataStorageManager.storeRememberedValue(time,BATTERY_VOLTAGE_ATER_PI_ON, batteryVoltageBefore, UNIT_VOLT);
-	dataStorageManager.storeRememberedValue(time,BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON, voltageDifferential, UNIT_PERCENTAGE);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(BATTERY_VOLTAGE_BEFORE_PI_ON), batteryVoltageBefore, UNIT_VOLT);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(BATTERY_VOLTAGE_ATER_PI_ON), batteryVoltageBefore, UNIT_VOLT);
+	dataStorageManager.storeRememberedValue(time,GET_PSTR(BATTERY_VOLTAGE_DIFFERENTIAL_AFTER_PI_ON), voltageDifferential, UNIT_PERCENTAGE);
 }
 
 
@@ -390,27 +369,27 @@ void PowerManager::turnPiOn(long time){
 void PowerManager::defineState(){
 	
 	float batteryVoltage = getBatteryVoltage();
-	byte internalBatteryStateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
+	byte internalBatteryStateOfCharge = GeneralFunctions::getStateOfCharge(batteryVoltage);
 	float currentFromBattery = getCurrentFromBattery();
 	
 	lcd.clear();
 	lcd.setCursor(0, 0);
 
-	lcd.print(generalFunctions.freeRam());
-	lcd.print("b ") ;
+	lcd.print(GeneralFunctions::freeRam());
+	lcd.print(F("b ")) ;
 
 	lcd.print(batteryVoltage) ;
-	lcd.print("V ") ;
+	lcd.print(F("V ")) ;
 	lcd.print(internalBatteryStateOfCharge);
-	lcd.print("%") ;
+	lcd.print("%");
 	lcd.setCursor(0, 1);
 	RTCInfoRecord r =timeManager.getCurrentDateTime();
 	lcd.print(r.hour);
-	lcd.print(":");
-	if(r.minute<10)lcd.print("0");
+	lcd.print(F(":"));
+	if(r.minute<10)lcd.print(F("0"));
 	lcd.print(r.minute);
-	lcd.print(":");
-	if(r.second<10)lcd.print("0");
+	lcd.print(F(":"));
+	if(r.second<10)lcd.print(F("0"));
 	lcd.print(r.second);
 	
 }
@@ -419,7 +398,7 @@ void PowerManager::defineState(){
 // 	long time = timeManager.getCurrentTimeInSeconds();
 
 // 	float batteryVoltage = getBatteryVoltage();
-// 	byte internalBatteryStateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
+// 	byte internalBatteryStateOfCharge = GeneralFunctions::getStateOfCharge(batteryVoltage);
 // 	float currentFromBattery = getCurrentFromBattery();
 // 	float inputFromSOlarPanel =  getCurrentInputFromSolarPanel();
 // 	float solarPanelVolltage = getSolarPanelVoltage();
@@ -441,10 +420,10 @@ void PowerManager::defineState(){
 // 			inPulse=false;
 // 			turnPiOff(time);
 // 			dataStorageManager.storeLifeCycleEvent(time, LIFE_CYCLE_MANUAL_SHUTDOWN, LIFE_CYCLE_EVENT_COMMA_VALUE);
-// 			lcd.print("Pi is OFF");
+// 			lcd.print(F("Pi is OFF"));
 // 			currentViewIndex=3;
 // 		}else{
-// 			lcd.print("in ");
+// 			lcd.print(F("in "));
 // 			lcd.print(	currentSecondsToPowerOff);
 // 		}
 // 	}else if(batteryVoltage>exitWPSVoltage){
@@ -460,7 +439,7 @@ void PowerManager::defineState(){
 // 		if(inPulse){
 // 			lcd.clear();
 // 			lcd.setCursor(0, 0);
-// 			lcd.print("Executing Pulse" );
+// 			lcd.print(F("Executing Pulse" );
 // 			lcd.setCursor(0, 1);
 // 			lcd.print( "Started at " );
 // 			lcd.print(  pulseStartTime );
@@ -488,18 +467,18 @@ void PowerManager::defineState(){
 // 					lcd.setCursor(0, 0);
 
 // 					lcd.print(freeRam());
-// 					lcd.print("b ") ;
+// 					lcd.print(F("b "));
 
 // 					lcd.print(batteryVoltage) ;
-// 					lcd.print("V ") ;
+// 					lcd.print(F("V "));
 // 					lcd.print(internalBatteryStateOfCharge);
-// 					lcd.print("%") ;
+// 					lcd.print(F("%"));
 // 					lcd.setCursor(0, 1);
 // 					RTCInfoRecord r =timeManager.getCurrentDateTime();
 // 					lcd.print(r.hour);
-// 					lcd.print(":");
+// 					lcd.print(F(":"));
 // 					lcd.print(r.minute);
-// 					lcd.print(":");
+// 					lcd.print(F(":"));
 // 					lcd.print(r.second);
 // 				}
 
@@ -508,9 +487,9 @@ void PowerManager::defineState(){
 // 			case 1:
 // 				lcd.clear();
 // 				lcd.setCursor(0, 0);
-// 				lcd.print("Create Password");
+// 				lcd.print(F("Create Password"));
 // 				lcd.setCursor(0, 1);
-// 				lcd.print(" ");
+// 				lcd.print(F(" "));
 // 				break;
 // 			case 2:
 // 				lcd.clear();
@@ -523,18 +502,18 @@ void PowerManager::defineState(){
 // 				lcd.clear();
 // 				lcd.setCursor(0, 0);
 // 				if(manualShutdown){
-// 					lcd.print("Pi is Off");
+// 					lcd.print(F("Pi is Off"));
 // 					lcd.setCursor(0, 1);
-// 					lcd.print("Turn On Pi?");
+// 					lcd.print(F("Turn On Pi?"));
 // 				}else if(waitingManualPiStart){
-// 					lcd.print("Waiting for Pi" );
+// 					lcd.print(F("Waiting for Pi" );
 // 					lcd.setCursor(0, 1);
-// 					lcd.print("To Start" );
+// 					lcd.print(F("To Start" );
 
 // 				}else{
-// 					lcd.print("Turn Off Pi");
+// 					lcd.print(F("Turn Off Pi"));
 // 					lcd.setCursor(0, 1);
-// 					lcd.print("Are You Sure?");
+// 					lcd.print(F("Are You Sure?"));
 // 				}
 
 // 				break;
@@ -542,9 +521,9 @@ void PowerManager::defineState(){
 // 			case 30:
 // 				lcd.clear();
 // 				lcd.setCursor(0, 0);
-// 				lcd.print("Shutting Down Pi" );
+// 				lcd.print(F("Shutting Down Pi" );
 // 				lcd.setCursor(0, 1);
-// 				lcd.print(" " );
+// 				lcd.print(F(" " );
 // 				break;
 
 
@@ -553,9 +532,9 @@ void PowerManager::defineState(){
 // 				// manually
 // 				lcd.clear();
 // 				lcd.setCursor(0, 0);
-// 				lcd.print("Waiting for Pi" );
+// 				lcd.print(F("Waiting for Pi" );
 // 				lcd.setCursor(0, 1);
-// 				lcd.print("To Start" );
+// 				lcd.print(F("To Start" );
 // 				currentViewIndex=3;
 // 				waitingManualPiStart=true;
 // 				break;
@@ -576,12 +555,12 @@ void PowerManager::defineState(){
 // 				if(!digitalRead(PI_POWER_PIN))turnPiOn(time);
 // 				dataStorageManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_END_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
 
-// 				lcd.print("Pi ON WPS ");
+// 				lcd.print(F("Pi ON WPS "));
 // 				lcd.setCursor(0,1);
 // 				lcd.print(batteryVoltage);
-// 				lcd.print("V ");
+// 				lcd.print(F("V "));
 // 				lcd.print(internalBatteryStateOfCharge);
-// 				lcd.print("%") ;
+// 				lcd.print(F("%"));
 // 				lastWPSStartUp = time;
 // 			}else{
 // 				//
@@ -590,12 +569,12 @@ void PowerManager::defineState(){
 // 				// check to see if we need to store a record in the sd card
 // 				//
 // 				long z =time-lastWPSRecordSeconds;
-// 				lcd.print("wps rec in ");
+// 				lcd.print(F("wps rec in "));
 // 				long netWPSRecordIn = (long)wpsPulseFrequencySeconds-z;
 
 // 				lcd.print(netWPSRecordIn);
 // 				lcd.setCursor(0,1);
-// 				lcd.print("pi on in ");
+// 				lcd.print(F("pi on in "));
 // 				long piremaining = secondsToNextPiOn-(time - currentSleepStartTime) ;
 // 				lcd.print(piremaining);
 
@@ -610,7 +589,7 @@ void PowerManager::defineState(){
 // 					WPSSensorRecord anWPSSensorRecord;
 // 					anWPSSensorRecord.batteryVoltage= getBatteryVoltage();
 // 					anWPSSensorRecord.current = getCurrentFromBattery();
-// 					anWPSSensorRecord.stateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
+// 					anWPSSensorRecord.stateOfCharge = GeneralFunctions::getStateOfCharge.(batteryVoltage);
 // 					anWPSSensorRecord.lastWPSRecordSeconds=lastWPSRecordSeconds;
 // 					anWPSSensorRecord.hourlyBatteryOutEnergy=hourlyBatteryOutEnergy;
 // 					anWPSSensorRecord.dailyBatteryOutEnergy=dailyBatteryOutEnergy;
@@ -641,11 +620,11 @@ void PowerManager::defineState(){
 // 		}else if(piIsOn){
 // 			lcd.clear();
 // 			lcd.setCursor(0,0);
-// 			lcd.print("pi ON WPS ");
+// 			lcd.print(F("pi ON WPS "));
 // 			lcd.print(batteryVoltage);
-// 			lcd.print(" V");
+// 			lcd.print(F(" V"));
 // 			lcd.setCursor(0,1);
-// 			lcd.print("Runtime ");
+// 			lcd.print(F("Runtime "));
 // 			long secsRunning = time-lastWPSStartUp;
 // 			lcd.print(secsRunning);
 // 		}
@@ -656,7 +635,7 @@ void PowerManager::defineState(){
 // 			lcd.clear();
 // 			lcd.setRGB(225, 225, 0);
 // 			lcd.setCursor(0, 0);
-// 			lcd.print("WPS Alert Sent");
+// 			lcd.print(F("WPS Alert Sent"));
 
 // 		}else{
 // 			if(waitingForWPSConfirmation){
@@ -671,26 +650,26 @@ void PowerManager::defineState(){
 // 					waitingForWPSConfirmation=false;
 // 					operatingStatus="WPS";
 // 					dataStorageManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_FORCED_START_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
-// 					lcd.print("pi off");
+// 					lcd.print(F("pi off"));
 // 					wpsSleeping=true;
 // 					currentSleepStartTime = time;
 // 					currentSecondsToPowerOff=0L;
 // 					turnPiOff(time);
 // 					wpsCountdown=false;
 // 				}else{
-// 					lcd.print("Waiting EnterWPS");
+// 					lcd.print(F("Waiting EnterWPS"));
 // 					lcd.setCursor(0,1);
 // 					long remaining = secondsToForcedWPS-z;
 // 					lcd.print(remaining);
-// 					lcd.print("  ");
+// 					lcd.print(F("  "));
 // 					lcd.print(batteryVoltage);
-// 					lcd.print("V ");
+// 					lcd.print(F("V "));
 // 				}
 // 			}else if(wpsCountdown){
 // 				currentSecondsToPowerOff = secondsToTurnPowerOff -( time - wpsCountDownStartSeconds);
 // 				lcd.clear();
 // 				lcd.setCursor(0,0);
-// 				lcd.print("wps countdown ");
+// 				lcd.print(F("wps countdown "));
 // 				lcd.setCursor(0,1);
 // 				lcd.print(	currentSecondsToPowerOff);
 // 				if(currentSecondsToPowerOff<=0){
@@ -715,12 +694,12 @@ void PowerManager::defineState(){
 // 					if(!digitalRead(PI_POWER_PIN))turnPiOn(time);
 // 					dataStorageManager.storeLifeCycleEvent(time, LIFE_CYCLE_EVENT_END_WPS, LIFE_CYCLE_EVENT_WPS_VALUE);
 
-// 					lcd.print("Pi ON WPS ");
+// 					lcd.print(F("Pi ON WPS "));
 // 					lcd.setCursor(0,1);
 // 					lcd.print(batteryVoltage);
-// 					lcd.print("V ");
+// 					lcd.print(F("V "));
 // 					lcd.print(internalBatteryStateOfCharge);
-// 					lcd.print("%") ;
+// 					lcd.print(F("%"));
 // 					lastWPSStartUp = time;
 // 				}else{
 // 					//
@@ -729,12 +708,12 @@ void PowerManager::defineState(){
 // 					// check to see if we need to store a record in the sd card
 // 					//
 // 					long z =time-lastWPSRecordSeconds;
-// 					lcd.print("WPS rec in ");
+// 					lcd.print(F("WPS rec in "));
 // 					long netWPSRecordIn = (long)wpsPulseFrequencySeconds-z;
 
 // 					lcd.print(netWPSRecordIn);
 // 					lcd.setCursor(0,1);
-// 					lcd.print("pi on in ");
+// 					lcd.print(F("pi on in "));
 // 					long piremaining = secondsToNextPiOn-(time - currentSleepStartTime) ;
 // 					lcd.print(piremaining);
 
@@ -749,7 +728,7 @@ void PowerManager::defineState(){
 // 						WPSSensorRecord anWPSSensorRecord;
 // 						anWPSSensorRecord.batteryVoltage= getBatteryVoltage();
 // 						anWPSSensorRecord.current = getCurrentFromBattery();
-// 						anWPSSensorRecord.stateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
+// 						anWPSSensorRecord.stateOfCharge = GeneralFunctions::getStateOfCharge(batteryVoltage);
 // 						anWPSSensorRecord.lastWPSRecordSeconds=lastWPSRecordSeconds;
 // 						anWPSSensorRecord.hourlyBatteryOutEnergy=hourlyBatteryOutEnergy;
 // 						anWPSSensorRecord.dailyBatteryOutEnergy=dailyBatteryOutEnergy;
@@ -779,11 +758,11 @@ void PowerManager::defineState(){
 // 				if(piIsOn){
 // 					lcd.clear();
 // 					lcd.setCursor(0,0);
-// 					lcd.print("pi ON WPS ");
+// 					lcd.print(F("pi ON WPS "));
 // 					lcd.print(batteryVoltage);
-// 					lcd.print(" V");
+// 					lcd.print(F(" V"));
 // 					lcd.setCursor(0,1);
-// 					lcd.print("Runtime ");
+// 					lcd.print(F("Runtime "));
 // 					long secsRunning = time-lastWPSStartUp;
 // 					lcd.print(secsRunning);
 // 				}else{
@@ -800,7 +779,7 @@ void PowerManager::defineState(){
 // 			lcd.clear();
 // 			lcd.setRGB(225, 0, 0);
 // 			lcd.setCursor(0, 0);
-// 			lcd.print("Comma Alert Sent");
+// 			lcd.print(F("Comma Alert Sent"));
 
 // 		}else{
 // 			if(waitingForWPSConfirmation){
@@ -824,11 +803,11 @@ void PowerManager::defineState(){
 // 						/* Don't forget to clear the flag. */
 // 						f_wdt = 0;
 // 						/* Re-enter sleep mode. */
-// 						lcd.print("Enter Comma");
+// 						lcd.print(F("Enter Comma"));
 // 						operatingStatus="Comma";
 // 						lcd.setCursor(0,1);
 // 						lcd.print(batteryVoltage);
-// 						lcd.print(" V");
+// 						lcd.print(F(" V"));
 // 						delay(2000);
 // 						lcd.setRGB(0,0,0);
 // 						lcd.noDisplay();
@@ -836,19 +815,19 @@ void PowerManager::defineState(){
 // 						enterArduinoSleep();
 // 					}
 // 				}else{
-// 					lcd.print("Waiting EnterWPS");
+// 					lcd.print(F("Waiting EnterWPS"));
 // 					lcd.setCursor(0,1);
 // 					long remaining = secondsToForcedWPS-z;
 // 					lcd.print(remaining);
-// 					lcd.print("  ");
+// 					lcd.print(F("  "));
 // 					lcd.print(batteryVoltage);
-// 					lcd.print("V ");
+// 					lcd.print(F("V "));
 // 				}
 // 			}else if(wpsCountdown){
 // 				currentSecondsToPowerOff = secondsToTurnPowerOff -( time - wpsCountDownStartSeconds);
 // 				lcd.clear();
 // 				lcd.setCursor(0,0);
-// 				lcd.print("wps countdown ");
+// 				lcd.print(F("wps countdown "));
 // 				lcd.setCursor(0,1);
 // 				lcd.print(	currentSecondsToPowerOff);
 // 				if(currentSecondsToPowerOff<=0){
@@ -861,11 +840,11 @@ void PowerManager::defineState(){
 // 						/* Don't forget to clear the flag. */
 // 						f_wdt = 0;
 // 						/* Re-enter sleep mode. */
-// 						lcd.print("Enter Comma");
+// 						lcd.print(F("Enter Comma"));
 // 						operatingStatus="Comma";
 // 						lcd.setCursor(0,1);
 // 						lcd.print(batteryVoltage);
-// 						lcd.print(" V");
+// 						lcd.print(F(" V"));
 // 						delay(2000);
 // 						lcd.setRGB(0,0,0);
 // 						lcd.noDisplay();
@@ -884,11 +863,11 @@ void PowerManager::defineState(){
 // 					lcd.clear();
 // 					lcd.setRGB(255,0,0);
 // 					lcd.setCursor(0,0);
-// 					lcd.print("Enter Comma");
+// 					lcd.print(F("Enter Comma"));
 // 					operatingStatus="Comma";
 // 					lcd.setCursor(0,1);
 // 					lcd.print(batteryVoltage);
-// 					lcd.print(" V");
+// 					lcd.print(F(" V"));
 // 					delay(2000);
 // 					lcd.setRGB(0,0,0);
 // 					lcd.noDisplay();
@@ -905,75 +884,76 @@ void PowerManager::defineState(){
 // 				lcd.clear();
 // 				lcd.setRGB(225, 0, 0);
 // 				lcd.setCursor(0, 0);
-// 				lcd.print("Comma Alert Sent");
+// 				lcd.print(F("Comma Alert Sent"));
 // 			}
 // 		}
 // 	}
 // }
 
-boolean PowerManager::processDefaultCommands(String command){
+boolean PowerManager::processDefaultCommands(String command)
+{
 	boolean processed=false;
-	if(command=="TestWPSSensor"){
+
+	if(command==F("TestWPSSensor")){
 		float batteryVoltage = getBatteryVoltage();
 		float current = getCurrentFromBattery();
-		int stateOfCharge= generalFunctions.getStateOfCharge(batteryVoltage);
+		int stateOfCharge= GeneralFunctions::getStateOfCharge(batteryVoltage);
 		boolean result = dataStorageManager.testWPSSensor( batteryVoltage,  current,  stateOfCharge,  operatingStatus);
 		if(result){
-			_HardSerial.println("Ok-TestWPSSensor");
+			_HardSerial.println(F("Ok-TestWPSSensor"));
 		}else{
-			_HardSerial.println("Failure-TestWPSSensor");
+			_HardSerial.println(F("Failure-TestWPSSensor"));
 		}
 		_HardSerial.flush();
 		processed=true;
-	}else if(command=="TestLifeCycle"){
+	}else if(command==F("TestLifeCycle")){
 		long now = timeManager.getCurrentTimeInSeconds();
-		dataStorageManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA, LIFE_CYCLE_EVENT_COMMA_VALUE);
-		_HardSerial.println("Ok-TestLifeCycle");
+		dataStorageManager.storeLifeCycleEvent(now, LIFE_CYCLE_EVENT_END_COMMA,LIFE_CYCLE_EVENT_COMMA_VALUE);
+		_HardSerial.println(F("Ok-TestLifeCycle"));
 		_HardSerial.flush();
 
-	}else if(command=="ListFiles"){
+	}else if(command==F("ListFiles")){
 		_HardSerial.println(" ");
 		_HardSerial.println(" ");
-		_HardSerial.println(sensorDirName);
+		//_HardSerial.println(sensorDirName);
 		float total = dataStorageManager.listFiles();
 
-
 		_HardSerial.println(" ");
 
-		_HardSerial.print("Used (Kb):  ");
+		_HardSerial.print(F("Used (Kb):  "));
 		_HardSerial.println(total);
 
 		_HardSerial.println("");
-		_HardSerial.println("Ok-ListFiles");
+		_HardSerial.println(F("Ok-ListFiles"));
 		_HardSerial.flush();
 		processed=true;
-	}else if(command=="Ping"){
+	}else if(command==F("Ping")){
 
-		_HardSerial.println("Ok-Ping");
+		_HardSerial.println(F("Ok-Ping"));
 		_HardSerial.flush();
 		processed=true;
-	}else if(command.startsWith("SetTime")){
+	}else if(command.startsWith(F("SetTime"))){
 
 		if(capacitorVoltage==0){
 			//
 			// we are in normal operation
 			//
-			_HardSerial.println("Failure-SetTime");
+			_HardSerial.println(F("Failure-SetTime"));
 			_HardSerial.flush();
 
 		}else{
 			boolean result = timeManager.setTime(command);
 			if(result){
-				_HardSerial.println("Ok-SetTime");
+				_HardSerial.println(F("Ok-SetTime"));
 			}else{
-				_HardSerial.println("Failure-SetTime");
+				_HardSerial.println(F("Failure-SetTime"));
 			}
 
 			_HardSerial.flush();
 		}
 		processed=true;
 
-	}else if(command.startsWith("GetTime")){
+	}else if(command.startsWith(F("GetTime"))){
 		RTCInfoRecord r =timeManager.getCurrentDateTime();
 		_HardSerial.print(r.date);
 		_HardSerial.print("/");
@@ -990,11 +970,11 @@ boolean PowerManager::processDefaultCommands(String command){
 
 		
 		_HardSerial.flush();
-		_HardSerial.println("Ok-GetTime");
+		_HardSerial.println(F("Ok-GetTime"));
 		_HardSerial.flush();
 		processed=true;
-	}else if(command.startsWith("VerifyUserCode")){
-		String codeInString = generalFunctions.getValue(command, '#', 1);
+	}else if(command.startsWith(F("VerifyUserCode"))){
+		String codeInString = GeneralFunctions::getValue(command, '#', 1);
 		long userCode = codeInString.toInt();
 		boolean validCode = secretManager.checkCode( userCode);
 		String result="Failure-Invalid Code";
@@ -1003,31 +983,31 @@ boolean PowerManager::processDefaultCommands(String command){
 		_HardSerial.flush();
 		delay(delayTime);
 		processed=true;
-	}else if(command.startsWith("GetCommandCodeGenerationTime")){
+	}else if(command.startsWith(F("GetCommandCodeGenerationTime"))){
 
 		long secOrig =timeManager.getTimeForCodeGeneration();
 
-		_HardSerial.print("secOrig=");
+		_HardSerial.print(F("secOrig="));
 		_HardSerial.println(secOrig);
 		_HardSerial.flush();
 		char secretCode[SHARED_SECRET_LENGTH];
 		secretManager.readSecret(secretCode);
-		_HardSerial.print("secretCode=");
+		_HardSerial.print(F("secretCode="));
 		_HardSerial.println(secretCode);
 		_HardSerial.flush();
 
 		TOTP totp = TOTP(secretCode);
-		long code=totp. gen_code  (secOrig ) ;
+		long code=totp. gen_code(secOrig);
 
 
 		//long code =secretManager.generateCode();
-		_HardSerial.print("code=");
+		_HardSerial.print(F("code="));
 		_HardSerial.println(code);
-		_HardSerial.println("Ok-GetCommandCodeGenerationTime");
+		_HardSerial.println(F("Ok-GetCommandCodeGenerationTime"));
 		_HardSerial.flush();
 		delay(delayTime);
 		processed=true;
-	}else if(command.startsWith("GetCommandCode")){
+	}else if(command.startsWith(F("GetCommandCode"))){
 
 		long code =secretManager.generateCode();
 		//
@@ -1035,7 +1015,7 @@ boolean PowerManager::processDefaultCommands(String command){
 		// if the first digit is a zero, it
 		// returns a 5 digit number
 		if(code<100000){
-			_HardSerial.print("0");
+			_HardSerial.print(F("0"));
 			_HardSerial.println(code);
 		}else{
 			_HardSerial.println(code);
@@ -1043,90 +1023,90 @@ boolean PowerManager::processDefaultCommands(String command){
 		_HardSerial.flush();
 		delay(delayTime);
 		processed=true;
-	}else if(command.startsWith("GetSecret")){
+	}else if(command.startsWith(F("GetSecret"))){
 		if(capacitorVoltage==0){
 			//
 			// we are in normal operation
 			//
-			_HardSerial.println("Failure-GetSecret");
+			_HardSerial.println(F("Failure-GetSecret"));
 			_HardSerial.flush();
 		}else{
 			char secretCode[SHARED_SECRET_LENGTH];
 			secretManager.readSecret(secretCode);
 			_HardSerial.println(secretCode);
-			_HardSerial.println("Ok-GetSecret");
+			_HardSerial.println(F("Ok-GetSecret"));
 			_HardSerial.flush();
 			delay(delayTime);
 		}
 
 		processed=true;
-	} else if(command.startsWith("SetSecret")){
+	} else if(command.startsWith(F("SetSecret"))){
 		if(capacitorVoltage==0){
 			//
 			// we are in normal operation
 			//
-			_HardSerial.println("Failure-SetSecret");
+			_HardSerial.println(F("Failure-SetSecret"));
 			_HardSerial.flush();
 		}else{
-			String secret = generalFunctions.getValue(command, '#', 1);
-			int numberDigits = generalFunctions.getValue(command, '#', 2).toInt();
-			int periodSeconds = generalFunctions.getValue(command, '#', 3).toInt();
+			String secret = GeneralFunctions::getValue(command, '#', 1);
+			int numberDigits = GeneralFunctions::getValue(command, '#', 2).toInt();
+			int periodSeconds = GeneralFunctions::getValue(command, '#', 3).toInt();
 			secretManager.saveSecret(secret, numberDigits, periodSeconds);
 
-			_HardSerial.println("Ok-SetSecret");
+			_HardSerial.println(F("Ok-SetSecret"));
 			_HardSerial.flush();
 		}
 		delay(delayTime);
 		processed=true;
-	}else if(command.startsWith("PulseStart")){
+	}else if(command.startsWith(F("PulseStart"))){
 		inPulse=true;
 		waitingManualPiStart=false;
-		pulseStartTime = generalFunctions.getValue(command, '#', 1);
-		_HardSerial.println("Ok-PulseStart");
+		pulseStartTime = GeneralFunctions::getValue(command, '#', 1);
+		_HardSerial.println(F("Ok-PulseStart"));
 		_HardSerial.flush();
 		lcd.clear();
 		lcd.setRGB(255,0,0);
 		processed=true;
-	}else if(command.startsWith("PulseFinished")){
-		pulseStopTime = generalFunctions.getValue(command, '#', 1);
+	}else if(command.startsWith(F("PulseFinished"))){
+		pulseStopTime = GeneralFunctions::getValue(command, '#', 1);
 		inPulse=false;
-		_HardSerial.println("Ok-PulseFinished");
+		_HardSerial.println(F("Ok-PulseFinished"));
 		_HardSerial.flush();
 		lcd.clear();
 		lcd.setRGB(255,255,255);
 		processed=true;
 
 
-	}else if(command.startsWith("IPAddr")){
-		currentIpAddress = generalFunctions.getValue(command, '#', 1);
-		_HardSerial.println("Ok-IPAddr");
+	}else if(command.startsWith(F("IPAddr"))){
+		currentIpAddress = GeneralFunctions::getValue(command, '#', 1);
+		_HardSerial.println(F("Ok-IPAddr"));
 		_HardSerial.flush();
 		delay(delayTime);
 		processed=true;
-	}else if(command.startsWith("SSID")){
-		currentSSID = generalFunctions.getValue(command, '#', 1);
-		_HardSerial.println("Ok-currentSSID");
+	}else if(command.startsWith(F("SSID"))){
+		currentSSID = GeneralFunctions::getValue(command, '#', 1);
+		_HardSerial.println(F("Ok-currentSSID"));
 		_HardSerial.flush();
 		delay(delayTime);
 		processed=true;
-	}else if(command.startsWith("HostMode")  ){
-		_HardSerial.println("Ok-HostMode");
+	}else if(command.startsWith(F("HostMode"))){
+		_HardSerial.println(F("Ok-HostMode"));
 		_HardSerial.flush();
 		delay(delayTime);
 		isHost=true;
 		processed=true;
-	}else if(command.startsWith("NetworkMode")   ){
-		_HardSerial.println("Ok-NetworkMode");
+	}else if(command.startsWith(F("NetworkMode"))){
+		_HardSerial.println(F("Ok-NetworkMode"));
 		_HardSerial.flush();
 		delay(delayTime);
 		isHost=false;
 		processed=true;
-	}else if(command.startsWith("EnterWPS")){
+	}else if(command.startsWith(F("EnterWPS"))){
 		//EnterWPS#10#45#30#1
-		secondsToTurnPowerOff = (long)generalFunctions.getValue(command, '#', 1).toInt();
-		secondsToNextPiOn = (long)generalFunctions.getValue(command, '#', 2).toInt();
-		wpsPulseFrequencySeconds = generalFunctions.getValue(command, '#', 3).toInt();
-		int pauseDuringWPSi = generalFunctions.getValue(command, '#', 4).toInt();
+		secondsToTurnPowerOff = (long)GeneralFunctions::getValue(command, '#', 1).toInt();
+		secondsToNextPiOn = (long)GeneralFunctions::getValue(command, '#', 2).toInt();
+		wpsPulseFrequencySeconds = GeneralFunctions::getValue(command, '#', 3).toInt();
+		int pauseDuringWPSi = GeneralFunctions::getValue(command, '#', 4).toInt();
 		if(pauseDuringWPSi==1)pauseDuringWPS=true;
 		else pauseDuringWPS=false;
 		waitingForWPSConfirmation=false;
@@ -1135,165 +1115,163 @@ boolean PowerManager::processDefaultCommands(String command){
 		wpsCountDownStartSeconds= timeManager.getCurrentTimeInSeconds();
 		currentSecondsToPowerOff=0L;
 
-		_HardSerial.println("Ok-EnterWPS");
+		_HardSerial.println(F("Ok-EnterWPS"));
 		_HardSerial.flush();
 		processed=true;
-	}else if(command.startsWith("ExitWPS")){
+	}else if(command.startsWith(F("ExitWPS"))){
 
-		_HardSerial.println("Ok-ExitWPS");
+		_HardSerial.println(F("Ok-ExitWPS"));
 		_HardSerial.flush();
 		inWPS=false;
 		operatingStatus="Normal";
 		currentSecondsToPowerOff=0L;
 		wpsCountdown=false;
 		processed=true;
-	}else if(command.startsWith("UpdateWPSParameters")){
-		String minWPSVoltageS = generalFunctions.getValue(command, '#', 1);
-		char buffer[10];
-		minWPSVoltageS.toCharArray(buffer, 10);
-		minWPSVoltage = atof(buffer);
+	}else if(command.startsWith(F("UpdateWPSParameters"))){
+		static_str<16> minWPSVoltageS = GeneralFunctions::getValue(command, '#', 1);
+		minWPSVoltage=minWPSVoltageS.toFloat();
 
-		minWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 1));
-		enterWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 2));
-		exitWPSVoltage = generalFunctions.stringToFloat(generalFunctions.getValue(command, '#', 3));
+		minWPSVoltage = GeneralFunctions::getValue(command, '#', 1).toFloat();
+		enterWPSVoltage = GeneralFunctions::getValue(command, '#', 2).toFloat();
+		exitWPSVoltage = GeneralFunctions::getValue(command, '#', 3).toFloat();
 
-		secondsToForcedWPS = generalFunctions.getValue(command, '#', 4).toInt();
-		_HardSerial.println("Ok-UpdateWPSParameters");
+		secondsToForcedWPS = GeneralFunctions::getValue(command, '#', 4).toInt();
+		_HardSerial.println(F("Ok-UpdateWPSParameters"));
 		_HardSerial.flush();
 
 		processed=true;
 
-	}else if(command.startsWith("GetRememberedValueData")){
+	}else if(command.startsWith(F("GetRememberedValueData"))){
 		//GetRememberedValueData#0
-		int transferData = generalFunctions.getValue(command, '#', 1).toInt();
+		int transferData = GeneralFunctions::getValue(command, '#', 1).toInt();
 		boolean result = dataStorageManager.readUntransferredFileFromSDCard( transferData,true, RememberedValueDataDirName);
 		if(result){
-			_HardSerial.println("Ok-GetRememberedValueData");
+			_HardSerial.println(F("Ok-GetRememberedValueData"));
 		}else {
-			char text[44];
-			snprintf(text, sizeof text, "Failure-error opening %s/%s", remFileName, unstraferedFileName);
+			static_str<44> text;
+			text.format(F("Failure-error opening %s/%s"),RememberedValueDataDirName,unstraferedFileName);
 			_HardSerial.println(text);
 		}
 		_HardSerial.flush();
 		processed=true;
-	}else if(command.startsWith("GetLifeCycleData")){
+	}else if(command.startsWith(F("GetLifeCycleData"))){
 		//GetLifeCycleData#0
-		int transferData = generalFunctions.getValue(command, '#', 1).toInt();
+		int transferData = GeneralFunctions::getValue(command, '#', 1).toInt();
 		boolean result = dataStorageManager.readUntransferredFileFromSDCard( transferData,true, LifeCycleDataDirName);
 		if(result){
-			_HardSerial.println("Ok-GetLifeCycleData");
+			_HardSerial.println(F("Ok-GetLifeCycleData"));
 		}else {
-			char text[44];
-			snprintf(text, sizeof text, "Failure-error opening %s/%s", LifeCycleDataDirName, unstraferedFileName);
+			static_str<44> text;
+			text.format(F("Failure-error opening %s/%s"), LifeCycleDataDirName, unstraferedFileName);
 			_HardSerial.println(text);
 		}
 		_HardSerial.flush();
 		processed=true;
-	}else if(command.startsWith("GetWPSSensorData")){
+	}else if(command.startsWith(F("GetWPSSensorData"))){
 		//GetWPSSensorData#0
 		//GetLifeCycleData#0
-		int transferData = generalFunctions.getValue(command, '#', 1).toInt();
+		int transferData = GeneralFunctions::getValue(command, '#', 1).toInt();
 		boolean result = dataStorageManager.readUntransferredFileFromSDCard( transferData,true, WPSSensorDataDirName);
 		if(result){
-			_HardSerial.println("Ok-GetWPSSensorData");
+			_HardSerial.println(F("Ok-GetWPSSensorData"));
 		}else {
 
-			char text[44];
-			snprintf(text, sizeof text, "Failure-error opening /%s/%s", WPSSensorDataDirName, unstraferedFileName);
+			static_str<44> text;
+			text.format(F("Failure-error opening /%s/%s"), WPSSensorDataDirName, unstraferedFileName);
 			_HardSerial.println(text);
 
 		}
 		_HardSerial.flush();
 		processed=true;
-	}else if(command.startsWith("GetHistoricalWPSSensorData")){
+	}else if(command.startsWith(F("GetHistoricalWPSSensorData"))){
 
-		int date = generalFunctions.getValue(command, '#', 1).toInt();
-		int month = generalFunctions.getValue(command, '#', 2).toInt();
-		int year = generalFunctions.getValue(command, '#', 3).toInt();
+		int date = GeneralFunctions::getValue(command, '#', 1).toInt();
+		int month = GeneralFunctions::getValue(command, '#', 2).toInt();
+		int year = GeneralFunctions::getValue(command, '#', 3).toInt();
 		boolean result  =dataStorageManager.getHistoricalData( WPSSensorDataDirName,  date,  month,  year);
 		if(result){
-			_HardSerial.println("Ok-GetWPSSensorDataHistory");
+			_HardSerial.println(F("Ok-GetWPSSensorDataHistory"));
 		}else {
-			char text[44];
-			snprintf(text, sizeof text, "Failure-error opening %s/%s", WPSSensorDataDirName, unstraferedFileName);
+			static_str<44> text;
+			text.format(F("Failure-error opening %s/%s"), WPSSensorDataDirName, unstraferedFileName);
 
 			_HardSerial.println(text);
 		}
 		_HardSerial.flush();
 		processed=true;
-	}else if(command.startsWith("GetHistoricalLifeCycleData")){
+	}else if(command.startsWith(F("GetHistoricalLifeCycleData"))){
 		//GetHistoricalLifeCycleData#12#1#19
-		int date = generalFunctions.getValue(command, '#', 1).toInt();
-		int month = generalFunctions.getValue(command, '#', 2).toInt();
-		int year = generalFunctions.getValue(command, '#', 3).toInt();
+		int date = GeneralFunctions::getValue(command, '#', 1).toInt();
+		int month = GeneralFunctions::getValue(command, '#', 2).toInt();
+		int year = GeneralFunctions::getValue(command, '#', 3).toInt();
 		boolean result  = dataStorageManager.getHistoricalData( LifeCycleDataDirName,  date,  month,  year);
 		if (result) {
-			_HardSerial.println("Ok-GetHistoricalLifeCycleData");
+			_HardSerial.println(F("Ok-GetHistoricalLifeCycleData"));
 		}else {
-			char text[44];
-			snprintf(text, sizeof text, "Failure-error opening %s/%s", LifeCycleDataDirName, unstraferedFileName);
+			static_str<44> text;
+			text.format(F("Failure-error opening %s/%s"), LifeCycleDataDirName, unstraferedFileName);
 			_HardSerial.println(text);
 		}
 		_HardSerial.flush();
 		processed=true;
-	}else if(command.startsWith("GetHistoricalRememberedValueData")){
+	}else if(command.startsWith(F("GetHistoricalRememberedValueData"))){
 		//GetHistoricalLifeCycleData#12#1#19
-		int date = generalFunctions.getValue(command, '#', 1).toInt();
-		int month = generalFunctions.getValue(command, '#', 2).toInt();
-		int year = generalFunctions.getValue(command, '#', 3).toInt();
+		int date = GeneralFunctions::getValue(command, '#', 1).toInt();
+		int month = GeneralFunctions::getValue(command, '#', 2).toInt();
+		int year = GeneralFunctions::getValue(command, '#', 3).toInt();
 		boolean result  = dataStorageManager.getHistoricalData( RememberedValueDataDirName,  date,  month,  year);
 		if (result) {
-			_HardSerial.println("Ok-GetHistoricalRememberedValueData");
+			_HardSerial.println(F("Ok-GetHistoricalRememberedValueData"));
 		}else {
-			char text[44];
-			snprintf(text, sizeof text, "Failure-error opening %s/%s", RememberedValueDataDirName, unstraferedFileName);
+			static_str<44> text;
+			text.format(F("Failure-error opening %s/%s"), RememberedValueDataDirName, unstraferedFileName);
 
 			_HardSerial.println(text);
 		}
 		_HardSerial.flush();
 		processed=true;
 	}else if (command == "AsyncData" ){
-		_HardSerial.println("Ok-No Data");
+		_HardSerial.println(F("Ok-No Data"));
 		_HardSerial.flush();
 		processed=true;
-	}else if (command.startsWith("FaultData") ){
+	}else if (command.startsWith(F("FaultData")) ){
 		//_HardSerial.println(faultData);
-		if(faultData=="Enter WPS"){
+		if(faultData==F("Enter WPS")){
 
-			_HardSerial.print("Fault#WPS Alert#Enter WPS#");
+			_HardSerial.print(F("Fault#WPS Alert#Enter WPS#"));
 			_HardSerial.print(secretManager.generateCode());
 
-			_HardSerial.print("#@On Load:Notify And Shutdown:Voltage At WPS#");
+			_HardSerial.print(F("#@On Load:Notify And Shutdown:Voltage At WPS#"));
 			_HardSerial.println(getBatteryVoltage());
 			waitingForWPSConfirmation=true;
 
 		}else{
-			_HardSerial.println("Ok");
+			_HardSerial.println(F("Ok"));
 		}
 
 		_HardSerial.flush();
 		faultData="";
 		delay(delayTime);
 		processed=true;
-	}else if (command.startsWith("UserCommand") ){
+	}else if (command.startsWith(F("UserCommand")) ){
 		//
 		// this function is not used in Ra2
 		// because Ra2 has no buttons
 		// but in the case that a teleonome does have
 		//human interface buttons connected to the microcontrller
 		// or there is a timer, here is where it will
-		_HardSerial.println("Ok-UserCommand");
+		_HardSerial.println(F("Ok-UserCommand"));
 		_HardSerial.flush();
 		delay(delayTime);
 		processed=true;
-	}else if (command.startsWith("TimerStatus") ){
+	}else if (command.startsWith(F("TimerStatus")) ){
 		//
 		// this function is not used in Ra2
 		// because Ra2 has no btimers
 		// but in the case that a teleonome does have
 		//human interface buttons connected to the microcontrller
 		// or there is a timer, here is where it will be
-		_HardSerial.println("Ok-TimerStatus");
+		_HardSerial.println(F("Ok-TimerStatus"));
 		_HardSerial.flush();
 		delay(delayTime);
 		processed=true;
@@ -1322,7 +1300,7 @@ void PowerManager::toggleWDT(){
 	}
 	else
 	{
-		//_HardSerial.println("WDT Overrun!!!");
+		//_HardSerial.println(F("WDT Overrun!!!"));
 	}
 }
 
@@ -1331,24 +1309,21 @@ void PowerManager::printBaseSensorStringToSerialPort(){
 	lcd.setCursor(0,0);
 	long now = millis();
 	float batteryVoltage = getBatteryVoltage();
-	lcd.print("S1:");
+	lcd.print(F("S1:"));
 	long dur = millis()-now;
 	lcd.print(dur);
 
-	byte internalBatteryStateOfCharge = generalFunctions.getStateOfCharge(batteryVoltage);
-
-
+	byte internalBatteryStateOfCharge = GeneralFunctions::getStateOfCharge(batteryVoltage);
 	now = millis();
 
-
 	float currentValue = getCurrentFromBattery();
-	lcd.print(" S2:");
+	lcd.print(F(" S2:"));
 	 dur = millis()-now;
 		lcd.print(dur);
 	lcd.setCursor(0,1);
 	now = millis();
 	float capacitorVoltage= getLockCapacitorVoltage();
-	lcd.print("S3:");
+	lcd.print(F("S3:"));
 	 dur = millis()-now;
 		lcd.print(dur);
 
@@ -1359,131 +1334,88 @@ void PowerManager::printBaseSensorStringToSerialPort(){
 	// Sensor Request Queue Position 1
 	//
 	now = millis();
-	char batteryVoltageStr[15];
-	dtostrf(batteryVoltage,4, 1, batteryVoltageStr);
-	_HardSerial.print(batteryVoltageStr) ;
-	_HardSerial.print("#") ;
-	lcd.print("S4:");
+	_HardSerial.print(static_str<16>(batteryVoltage,4,1));
+	_HardSerial.print(F("#"));
+	lcd.print(F("S4:"));
 	 dur = millis()-now;
 		lcd.print(dur);
 	//
 	// Sensor Request Queue Position 2
 	//
-	char currentValueStr[15];
-	dtostrf(currentValue,4, 0, currentValueStr);
-	_HardSerial.print(currentValueStr) ;
-	_HardSerial.print("#") ;
-
+	_HardSerial.print(static_str<16>(currentValue,4,0));
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 3
 	//
-	char capacitorVoltageStr[15];
-	dtostrf(capacitorVoltage,2, 1, capacitorVoltageStr);
-	_HardSerial.print(capacitorVoltageStr) ;
-	_HardSerial.print("#") ;
-
-
+	_HardSerial.print(static_str<16>(capacitorVoltage,2,1));
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 4
 	//
 	_HardSerial.print( internalBatteryStateOfCharge);
-	_HardSerial.print("#") ;
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 5
 	//
-
 	_HardSerial.print( operatingStatus);
-	_HardSerial.print("#") ;
-
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 6
 	//
-
-	char dailyMinBatteryVoltageStr[15];
-	dtostrf(dailyMinBatteryVoltage,4, 0, dailyMinBatteryVoltageStr);
-	_HardSerial.print(dailyMinBatteryVoltageStr) ;
-	_HardSerial.print("#") ;
-
+	_HardSerial.print(static_str<16>(dailyMinBatteryVoltage,4,0));
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 7
 	//
-
-	char dailyMaxBatteryVoltageStr[15];
-	dtostrf(dailyMaxBatteryVoltage,4, 0, dailyMaxBatteryVoltageStr);
-	_HardSerial.print(dailyMaxBatteryVoltageStr) ;
-	_HardSerial.print("#") ;
-
+	_HardSerial.print(static_str<16>(dailyMaxBatteryVoltage,4,0));
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 8
 	//
-
-	char dailyMinBatteryCurrentStr[15];
-	dtostrf(dailyMinBatteryCurrent,4, 0, dailyMinBatteryCurrentStr);
-	_HardSerial.print(dailyMinBatteryCurrentStr) ;
-	_HardSerial.print("#") ;
-
+	_HardSerial.print(static_str<16>(dailyMinBatteryCurrent,4, 0)) ;
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 9
 	//
-
-	char dailyMaxBatteryCurrentStr[15];
-	dtostrf(dailyMaxBatteryCurrent,4, 0, dailyMaxBatteryCurrentStr);
-	_HardSerial.print(dailyMaxBatteryCurrentStr) ;
-	_HardSerial.print("#") ;
-
+	_HardSerial.print(static_str<16>(dailyMaxBatteryCurrent,4,0));
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 10
 	//
-
-	char dailyBatteryOutEnergyStr[15];
-	dtostrf(dailyBatteryOutEnergy,4, 0, dailyBatteryOutEnergyStr);
-	_HardSerial.print(dailyBatteryOutEnergyStr) ;
-	_HardSerial.print("#") ;
-
+	_HardSerial.print(static_str<16>(dailyBatteryOutEnergy,4,0));
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 11
 	//
-
-	char dailyPoweredDownInLoopSecondsStr[15];
-	dtostrf(dailyPoweredDownInLoopSeconds,4, 0, dailyPoweredDownInLoopSecondsStr);
-	_HardSerial.print(dailyPoweredDownInLoopSecondsStr) ;
-	_HardSerial.print("#") ;
-
+	_HardSerial.print(static_str<16>(dailyPoweredDownInLoopSeconds,4,0));
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 12
 	//
-
-	char hourlyBatteryOutEnergyStr[15];
-	dtostrf(hourlyBatteryOutEnergy,4, 0, hourlyBatteryOutEnergyStr);
-	_HardSerial.print(hourlyBatteryOutEnergyStr) ;
-	_HardSerial.print("#") ;
+	_HardSerial.print(static_str<16>(hourlyBatteryOutEnergy,4,0));
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 13
 	//
-
-	char hourlyPoweredDownInLoopSecondsStr[15];
-	dtostrf(hourlyPoweredDownInLoopSeconds,4, 0, hourlyPoweredDownInLoopSecondsStr);
-	_HardSerial.print(hourlyPoweredDownInLoopSecondsStr) ;
-	_HardSerial.print("#") ;
-
+	_HardSerial.print(static_str<16>(hourlyPoweredDownInLoopSeconds,4,0));
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 14
 	//
 	now = millis();
 	lcd.clear();
 	lcd.setCursor(0,0);
-	lcd.print("S5:");
+	lcd.print(F("S5:"));
 	long totalDiskUse=dataStorageManager.getDiskUsage();
 	dur = millis()-now;
 
 	lcd.print(dur);
 	_HardSerial.print(totalDiskUse/1024);
-	_HardSerial.print("#");
+	_HardSerial.print(F("#"));
 	//
 	// Sensor Request Queue Position 15
 	//
-
 	_HardSerial.print(pauseDuringWPS);
-	_HardSerial.print("#");
+	_HardSerial.print(F("#"));
 	_HardSerial.flush();
 }
